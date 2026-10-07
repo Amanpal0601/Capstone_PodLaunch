@@ -1,0 +1,384 @@
+/* ==========================================================================
+   PODLAUNCH — NEO-BRUTALIST LIGHT DESIGN SYSTEM
+   High-contrast, bold geometry, hard offset shadows, vibrant pop colors.
+   ========================================================================== */
+
+:root {
+  /* Typography */
+  --font-display: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Neo-Brutalist Light Palette */
+  --bg-page: #FBF9F5;
+  --bg-page-alt: #F3EFE6;
+  --bg-card: #FFFFFF;
+  --bg-card-muted: #F8FAFC;
+  --bg-terminal: #0F172A;
+
+  /* Strict Brutalist Borders & Shadows */
+  --color-border: #000000;
+  --border-thick: 2.5px solid var(--color-border);
+  --border-heavy: 3.5px solid var(--color-border);
+  --border-thin: 1.5px solid var(--color-border);
+
+  --shadow-sm: 2px 2px 0px #000000;
+  --shadow-md: 4px 4px 0px #000000;
+  --shadow-lg: 6px 6px 0px #000000;
+  --shadow-xl: 8px 8px 0px #000000;
+  --shadow-hover: 7px 7px 0px #000000;
+  --shadow-active: 1px 1px 0px #000000;
+
+  /* Neo Pop Colors */
+  --neo-yellow: #FFE600;
+  --neo-green: #4ADE80;
+  --neo-mint: #2DD4BF;
+  --neo-cyan: #38BDF8;
+  --neo-blue: #60A5FA;
+  --neo-purple: #C084FC;
+  --neo-pink: #F472B6;
+  --neo-coral: #FF6B6B;
+  --neo-orange: #FB923C;
+
+  /* Text & Accents */
+  --text-primary: #000000;
+  --text-secondary: #334155;
+  --text-muted: #64748B;
+  --text-on-dark: #F8FAFC;
+
+  /* Radius (Geometric & Slightly Rounded) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 9999px;
+
+  /* Animation */
+  --transition-bounce: 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 0.1s ease;
+}
+
+/* Reset & Blueprint Grid Background */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  background-image: 
+    radial-gradient(#000000 0.75px, transparent 0.75px),
+    radial-gradient(#000000 0.75px, var(--bg-page) 0.75px);
+  background-size: 28px 28px;
+  background-position: 0 0, 14px 14px;
+  color: var(--text-primary);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Typography Defaults */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page-alt);
+  border-left: var(--border-thick);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--neo-yellow);
+  border: var(--border-thick);
+  box-shadow: 2px 2px 0px #000;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neo-cyan);
+}
+
+/* Layout Container */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+
+.max-w-7xl {
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* ==========================================================================
+   NEO-BRUTALIST COMPONENTS & UTILITIES
+   ========================================================================== */
+
+/* Cards */
+.neo-card {
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-bounce), box-shadow var(--transition-bounce);
+}
+
+.neo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.neo-card-flat {
+  background: var(--bg-card);
+  border: var(--border-thick);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-bounce);
+  white-space: nowrap;
+  user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-active);
+}
+
+.btn-yellow {
+  background: var(--neo-yellow);
+  color: #000000;
+}
+.btn-yellow:hover {
+  background: #FFE000;
+}
+
+.btn-cyan {
+  background: var(--neo-cyan);
+  color: #000000;
+}
+.btn-cyan:hover {
+  background: #0EA5E9;
+  color: #FFFFFF;
+}
+
+.btn-mint {
+  background: var(--neo-green);
+  color: #000000;
+}
+
+.btn-purple {
+  background: var(--neo-purple);
+  color: #000000;
+}
+
+.btn-coral {
+  background: var(--neo-coral);
+  color: #FFFFFF;
+}
+
+.btn-white {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+.btn-black {
+  background: #000000;
+  color: #FFFFFF;
+}
+.btn-black:hover {
+  background: #1E293B;
+}
+
+.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  box-shadow: var(--shadow-sm);
+}
+.btn-sm:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.btn-lg {
+  padding: 0.95rem 1.85rem;
+  font-size: 1.05rem;
+  box-shadow: var(--shadow-lg);
+}
+
+/* Badges & Tags */
+.neo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border: var(--border-thin);
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  text-transform: uppercase;
+}
+
+.tag-yellow { background: var(--neo-yellow); color: #000; }
+.tag-green { background: var(--neo-green); color: #000; }
+.tag-cyan { background: var(--neo-cyan); color: #000; }
+.tag-purple { background: var(--neo-purple); color: #000; }
+.tag-pink { background: var(--neo-pink); color: #000; }
+.tag-coral { background: var(--neo-coral); color: #FFF; }
+.tag-white { background: #FFFFFF; color: #000; }
+.tag-dark { background: #000000; color: #FFF; border-color: #000; }
+
+/* Forms & Inputs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #FFFFFF;
+  border: var(--border-thick);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  background: #FFFDF0;
+  box-shadow: var(--shadow-md);
+  transform: translate(-1px, -1px);
+}
+
+.form-textarea {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  resize: vertical;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1.5rem;
+  animation: modalPop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .grid-2, .grid-4 { grid-template-columns: 1fr; }
+}
