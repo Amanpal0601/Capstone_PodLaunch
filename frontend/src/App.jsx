@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser, useClerk } from '@clerk/clerk-react';
 import Navbar from './components/Navbar';
 import LandingPage from './components/LandingPage';
 import Dashboard from './components/Dashboard';
 import AuthModal from './components/AuthModal';
+import AuthPage from './components/AuthPage';
 import Footer from './components/Footer';
 import { 
   INITIAL_FUNCTIONS, 
@@ -11,8 +13,27 @@ import {
   STRATEGIES_INFO 
 } from './data/initialData';
 
-export default function App() {
-  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'dashboard'
+// Component that syncs Clerk user state when ClerkProvider is active
+function ClerkAuthSync({ onSyncUser }) {
+  const { isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    if (isSignedIn && user) {
+      onSyncUser({
+        name: user.fullName || user.username || user.primaryEmailAddress?.emailAddress?.split('@')[0] || "Clerk Developer",
+        email: user.primaryEmailAddress?.emailAddress || "developer@podlaunch.io",
+        role: "Clerk Authenticated Engineer",
+        avatar: user.imageUrl || (user.firstName ? user.firstName[0] : "C"),
+        token: user.id
+      });
+    }
+  }, [isSignedIn, user, onSyncUser]);
+
+  return null;
+}
+
+export default function App({ isClerkEnabled = false }) {
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'dashboard' | 'auth'
   const [currentUser, setCurrentUser] = useState({
     name: "Aman Pal",
     email: "amanpal@podlaunch.local",
@@ -30,9 +51,13 @@ export default function App() {
   const [containers, setContainers] = useState(INITIAL_CONTAINERS);
   const [logs, setLogs] = useState(INITIAL_LOGS);
 
-  const handleOpenAuth = (mode = 'signin') => {
+  const handleOpenAuth = (mode = 'signin', openPage = true) => {
     setAuthMode(mode);
-    setIsAuthOpen(true);
+    if (openPage) {
+      setCurrentView('auth');
+    } else {
+      setIsAuthOpen(true);
+    }
   };
 
   const handleLoginSuccess = (user) => {
@@ -46,12 +71,15 @@ export default function App() {
 
   return (
     <div className="app-container">
+      {/* Sync Clerk Session if enabled */}
+      {isClerkEnabled && <ClerkAuthSync onSyncUser={setCurrentUser} />}
+
       {/* Top Navbar */}
       <Navbar 
         currentView={currentView}
         setCurrentView={setCurrentView}
         currentUser={currentUser}
-        onOpenAuth={handleOpenAuth}
+        onOpenAuth={(mode) => handleOpenAuth(mode, true)}
         onLogout={handleLogout}
         activeStrategy={activeStrategy}
         onOpenStrategyModal={() => setCurrentView('dashboard')}
@@ -59,14 +87,16 @@ export default function App() {
 
       {/* Main View Area */}
       <main className="main-content">
-        {currentView === 'landing' ? (
+        {currentView === 'landing' && (
           <LandingPage 
             onLaunchConsole={() => setCurrentView('dashboard')}
-            onOpenAuth={handleOpenAuth}
+            onOpenAuth={(mode) => handleOpenAuth(mode, true)}
             activeStrategy={activeStrategy}
             setActiveStrategy={setActiveStrategy}
           />
-        ) : (
+        )}
+
+        {currentView === 'dashboard' && (
           <Dashboard 
             functions={functions}
             setFunctions={setFunctions}
@@ -79,9 +109,20 @@ export default function App() {
             currentUser={currentUser}
           />
         )}
+
+        {currentView === 'auth' && (
+          <AuthPage 
+            initialMode={authMode}
+            onLoginSuccess={handleLoginSuccess}
+            onBack={() => setCurrentView('dashboard')}
+            isClerkEnabled={isClerkEnabled}
+            clerkUser={currentUser}
+            onClerkSignOut={handleLogout}
+          />
+        )}
       </main>
 
-      {/* Auth Modal */}
+      {/* Quick Auth Modal */}
       <AuthModal 
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
@@ -91,7 +132,7 @@ export default function App() {
 
       {/* Academic Capstone Footer */}
       <Footer 
-        onNavigate={(view, tab) => {
+        onNavigate={(view) => {
           setCurrentView(view);
         }}
       />
