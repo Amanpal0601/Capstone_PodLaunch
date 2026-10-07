@@ -13,36 +13,42 @@ import {
   STRATEGIES_INFO 
 } from './data/initialData';
 
-// Component that syncs Clerk user state when ClerkProvider is active
-function ClerkAuthSync({ onSyncUser }) {
-  const { isSignedIn, user } = useUser();
+import { syncUserWithSupabase } from './services/supabase';
+
+// Component that syncs live Clerk user session
+function ClerkAuthSync({ onSyncUser, currentView, setCurrentView }) {
+  const { isLoaded, isSignedIn, user } = useUser();
 
   useEffect(() => {
-    if (isSignedIn && user) {
-      onSyncUser({
-        name: user.fullName || user.username || user.primaryEmailAddress?.emailAddress?.split('@')[0] || "Clerk Developer",
-        email: user.primaryEmailAddress?.emailAddress || "developer@podlaunch.io",
-        role: "Clerk Authenticated Engineer",
-        avatar: user.imageUrl || (user.firstName ? user.firstName[0] : "C"),
-        token: user.id
-      });
+    if (isLoaded) {
+      if (isSignedIn && user) {
+        const profile = {
+          name: user.fullName || user.username || user.firstName || user.primaryEmailAddress?.emailAddress?.split('@')[0] || "Developer",
+          email: user.primaryEmailAddress?.emailAddress || "",
+          role: "Clerk Authenticated Engineer",
+          avatar: user.imageUrl || (user.firstName ? user.firstName[0] : "C"),
+          token: user.id
+        };
+        onSyncUser(profile);
+
+        // Automatically persist user profile into Supabase public.users table
+        syncUserWithSupabase(user);
+
+        if (currentView === 'auth') {
+          setCurrentView('dashboard');
+        }
+      } else {
+        onSyncUser(null);
+      }
     }
-  }, [isSignedIn, user, onSyncUser]);
+  }, [isLoaded, isSignedIn, user, onSyncUser, currentView, setCurrentView]);
 
   return null;
 }
 
-export default function App({ isClerkEnabled = false }) {
+export default function App({ isClerkEnabled = true }) {
   const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'dashboard' | 'auth'
-  const [currentUser, setCurrentUser] = useState({
-    name: "Aman Pal",
-    email: "amanpal@podlaunch.local",
-    role: "Function Registry & API Lead (Group-22)",
-    avatar: "AP",
-    token: "jwt_mock_podlaunch_amanpal"
-  });
-
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); // null when logged out
   const [authMode, setAuthMode] = useState('signin');
 
   // Core Platform Global State
@@ -51,13 +57,11 @@ export default function App({ isClerkEnabled = false }) {
   const [containers, setContainers] = useState(INITIAL_CONTAINERS);
   const [logs, setLogs] = useState(INITIAL_LOGS);
 
-  const handleOpenAuth = (mode = 'signin', openPage = true) => {
+  const clerk = useClerk();
+
+  const handleOpenAuth = (mode = 'signin') => {
     setAuthMode(mode);
-    if (openPage) {
-      setCurrentView('auth');
-    } else {
-      setIsAuthOpen(true);
-    }
+    setCurrentView('auth');
   };
 
   const handleLoginSuccess = (user) => {
@@ -65,21 +69,36 @@ export default function App({ isClerkEnabled = false }) {
     setCurrentView('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if (clerk?.signOut) {
+        await clerk.signOut();
+      }
+    } catch (err) {
+      console.error("Clerk sign-out error:", err);
+    }
     setCurrentUser(null);
+    setAuthMode('signin');
+    setCurrentView('auth'); // Immediately require login again
   };
 
   return (
     <div className="app-container">
-      {/* Sync Clerk Session if enabled */}
-      {isClerkEnabled && <ClerkAuthSync onSyncUser={setCurrentUser} />}
+      {/* Sync Clerk Session */}
+      {isClerkEnabled && (
+        <ClerkAuthSync 
+          onSyncUser={setCurrentUser} 
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+        />
+      )}
 
       {/* Top Navbar */}
       <Navbar 
         currentView={currentView}
         setCurrentView={setCurrentView}
         currentUser={currentUser}
-        onOpenAuth={(mode) => handleOpenAuth(mode, true)}
+        onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
         activeStrategy={activeStrategy}
         onOpenStrategyModal={() => setCurrentView('dashboard')}
@@ -89,46 +108,45 @@ export default function App({ isClerkEnabled = false }) {
       <main className="main-content">
         {currentView === 'landing' && (
           <LandingPage 
-            onLaunchConsole={() => setCurrentView('dashboard')}
-            onOpenAuth={(mode) => handleOpenAuth(mode, true)}
+            onLaunchConsole={() => setCurrentView(currentUser ? 'dashboard' : 'auth')}
+            onOpenAuth={handleOpenAuth}
             activeStrategy={activeStrategy}
             setActiveStrategy={setActiveStrategy}
           />
         )}
 
         {currentView === 'dashboard' && (
-          <Dashboard 
-            functions={functions}
-            setFunctions={setFunctions}
-            containers={containers}
-            setContainers={setContainers}
-            logs={logs}
-            setLogs={setLogs}
-            activeStrategy={activeStrategy}
-            setActiveStrategy={setActiveStrategy}
-            currentUser={currentUser}
-          />
+          currentUser ? (
+            <Dashboard 
+              functions={functions}
+              setFunctions={setFunctions}
+              containers={containers}
+              setContainers={setContainers}
+              logs={logs}
+              setLogs={setLogs}
+              activeStrategy={activeStrategy}
+              setActiveStrategy={setActiveStrategy}
+              currentUser={currentUser}
+            />
+          ) : (
+            <AuthPage 
+              initialMode="signin"
+              onLoginSuccess={handleLoginSuccess}
+              onBack={() => setCurrentView('landing')}
+              isClerkEnabled={isClerkEnabled}
+            />
+          )
         )}
 
         {currentView === 'auth' && (
           <AuthPage 
             initialMode={authMode}
             onLoginSuccess={handleLoginSuccess}
-            onBack={() => setCurrentView('dashboard')}
+            onBack={() => setCurrentView(currentUser ? 'dashboard' : 'landing')}
             isClerkEnabled={isClerkEnabled}
-            clerkUser={currentUser}
-            onClerkSignOut={handleLogout}
           />
         )}
       </main>
-
-      {/* Quick Auth Modal */}
-      <AuthModal 
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        initialMode={authMode}
-        onLoginSuccess={handleLoginSuccess}
-      />
 
       {/* Academic Capstone Footer */}
       <Footer 

@@ -1,13 +1,11 @@
 import React from 'react';
 import { 
-  Terminal, 
-  Layers, 
   BarChart3, 
   User, 
   LogOut, 
   Zap,
-  Sparkles,
-  Box
+  Box,
+  LogIn
 } from 'lucide-react';
 import { STRATEGIES_INFO } from '../data/initialData';
 
@@ -21,10 +19,29 @@ export default function Navbar({
 }) {
   const currentStrategyInfo = STRATEGIES_INFO[activeStrategy] || STRATEGIES_INFO.predictive;
 
+  const isImageUrl = (avatar) => {
+    return typeof avatar === 'string' && (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('/'));
+  };
+
+  const getInitials = (user) => {
+    if (!user) return 'U';
+    if (typeof user.avatar === 'string' && !isImageUrl(user.avatar)) {
+      return user.avatar.slice(0, 2).toUpperCase();
+    }
+    const nameStr = user.name || user.email || 'User';
+    return nameStr.charAt(0).toUpperCase();
+  };
+
+  const getDisplayName = (user) => {
+    if (!user) return '';
+    const nameStr = user.name || user.email?.split('@')[0] || 'Developer';
+    return nameStr.split(' ')[0];
+  };
+
   return (
     <header className="navbar-container">
       <div className="max-w-7xl navbar-inner">
-        {/* Brand Logo - Geometric Neo-Brutalist */}
+        {/* Brand Logo */}
         <div 
           className="brand-logo" 
           onClick={() => setCurrentView('landing')}
@@ -35,7 +52,7 @@ export default function Navbar({
           </div>
           <div className="brand-text">
             <span className="brand-title">POD<span className="brand-title-accent">LAUNCH</span></span>
-            <span className="neo-tag tag-green brand-sub-tag">RESEARCH LAB</span>
+            <span className="neo-tag tag-green brand-sub-tag">LAB</span>
           </div>
         </div>
 
@@ -74,7 +91,7 @@ export default function Navbar({
               }
             }}
           >
-            Group-22 Team
+            Team
           </a>
         </nav>
 
@@ -92,16 +109,28 @@ export default function Navbar({
             <span className="strat-name">{currentStrategyInfo.name.split(' ')[0]}</span>
           </div>
 
-          {/* User Auth or Launch Console */}
+          {/* User Profile or Sign In CTA */}
           {currentUser ? (
             <div className="user-menu-wrap">
               <div 
                 className="user-pill"
                 onClick={() => setCurrentView('dashboard')}
+                title="Go to Console"
               >
-                <div className="user-avatar-icon">{currentUser.avatar || 'U'}</div>
-                <span className="user-text-name">{currentUser.name.split(' ')[0]}</span>
+                <div className="user-avatar-icon">
+                  {isImageUrl(currentUser.avatar) ? (
+                    <img 
+                      src={currentUser.avatar} 
+                      alt="User Avatar" 
+                      className="user-avatar-img" 
+                    />
+                  ) : (
+                    <span>{getInitials(currentUser)}</span>
+                  )}
+                </div>
+                <span className="user-text-name">{getDisplayName(currentUser)}</span>
               </div>
+
               <button 
                 className="btn btn-white btn-sm"
                 onClick={onLogout}
@@ -117,6 +146,7 @@ export default function Navbar({
                 className="btn btn-white btn-sm"
                 onClick={() => onOpenAuth('signin')}
               >
+                <LogIn size={14} strokeWidth={2.5} />
                 Sign In
               </button>
               <button 
@@ -138,26 +168,28 @@ export default function Navbar({
           background: #FFFFFF;
           border-bottom: var(--border-thick);
           box-shadow: 0 4px 0px #000000;
-          padding: 0.75rem 0;
+          padding: 0.75rem 1.25rem;
         }
 
         .navbar-inner {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 1.5rem;
+          gap: 1rem;
+          margin: 0 auto;
         }
 
         .brand-logo {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.65rem;
           user-select: none;
+          flex-shrink: 0;
         }
 
         .logo-box {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
           background: var(--neo-yellow);
           border: var(--border-thick);
           border-radius: var(--radius-sm);
@@ -175,12 +207,12 @@ export default function Navbar({
         .brand-text {
           display: flex;
           align-items: center;
-          gap: 0.6rem;
+          gap: 0.5rem;
         }
 
         .brand-title {
           font-family: var(--font-display);
-          font-size: 1.45rem;
+          font-size: 1.35rem;
           font-weight: 900;
           letter-spacing: -0.04em;
           color: #000000;
@@ -188,7 +220,7 @@ export default function Navbar({
 
         .brand-title-accent {
           background: var(--neo-cyan);
-          padding: 0 0.25rem;
+          padding: 0 0.2rem;
           border: 1.5px solid #000;
           box-shadow: 1.5px 1.5px 0px #000;
           margin-left: 0.15rem;
@@ -196,13 +228,13 @@ export default function Navbar({
 
         .brand-sub-tag {
           font-size: 0.65rem;
-          padding: 0.15rem 0.5rem;
+          padding: 0.15rem 0.45rem;
         }
 
         .nav-links {
           display: flex;
           align-items: center;
-          gap: 0.75rem;
+          gap: 0.5rem;
         }
 
         .nav-btn {
@@ -210,9 +242,9 @@ export default function Navbar({
           border: 2px solid transparent;
           color: #000000;
           font-family: var(--font-display);
-          font-size: 0.925rem;
+          font-size: 0.9rem;
           font-weight: 700;
-          padding: 0.4rem 0.85rem;
+          padding: 0.35rem 0.75rem;
           border-radius: var(--radius-sm);
           cursor: pointer;
           display: flex;
@@ -225,26 +257,26 @@ export default function Navbar({
           background: var(--bg-page-alt);
           border-color: #000000;
           box-shadow: var(--shadow-sm);
-          transform: translate(-1px, -1px);
         }
 
         .nav-btn.active {
           background: var(--neo-yellow);
-          border: 2px solid #000000;
-          box-shadow: 2px 2px 0px #000000;
+          border: var(--border-thick);
+          box-shadow: var(--shadow-sm);
         }
 
         .nav-actions {
           display: flex;
           align-items: center;
           gap: 0.75rem;
+          flex-shrink: 0;
         }
 
         .strategy-pill {
           display: flex;
           align-items: center;
-          gap: 0.45rem;
-          padding: 0.35rem 0.75rem;
+          gap: 0.4rem;
+          padding: 0.35rem 0.65rem;
           border: var(--border-thick);
           border-radius: var(--radius-sm);
           box-shadow: var(--shadow-sm);
@@ -282,12 +314,13 @@ export default function Navbar({
           background: #FFFFFF;
           border: var(--border-thick);
           box-shadow: var(--shadow-sm);
-          padding: 0.25rem 0.75rem 0.25rem 0.35rem;
+          padding: 0.25rem 0.65rem 0.25rem 0.35rem;
           border-radius: var(--radius-sm);
           cursor: pointer;
           font-weight: 800;
           font-size: 0.85rem;
           transition: all var(--transition-fast);
+          max-width: 140px;
         }
 
         .user-pill:hover {
@@ -298,6 +331,7 @@ export default function Navbar({
         .user-avatar-icon {
           width: 24px;
           height: 24px;
+          min-width: 24px;
           border-radius: var(--radius-xs);
           background: var(--neo-purple);
           border: 1.5px solid #000;
@@ -307,12 +341,25 @@ export default function Navbar({
           display: flex;
           align-items: center;
           justify-content: center;
+          overflow: hidden;
+        }
+
+        .user-avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .user-text-name {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .auth-btn-group {
           display: flex;
           align-items: center;
-          gap: 0.6rem;
+          gap: 0.5rem;
         }
 
         @media (max-width: 860px) {

@@ -1,47 +1,36 @@
 import React, { useState } from 'react';
-import { 
-  Lock, 
-  Mail, 
-  User, 
-  Sparkles, 
-  ArrowRight, 
-  ArrowLeft, 
-  ShieldCheck, 
-  CheckCircle2, 
-  AlertCircle, 
-  Key, 
-  Box, 
-  Terminal, 
-  Zap, 
-  Layers 
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { SignIn, SignUp } from '@clerk/clerk-react';
-import { TEAM_MEMBERS } from '../data/initialData';
 
-// Neo-Brutalist appearance customization for Clerk components
+// Custom Neo-Brutalist Theme tokens for Clerk components
 const clerkNeoBrutalistAppearance = {
   elements: {
     rootBox: {
       width: '100%',
+      maxWidth: '440px',
+      margin: '0 auto',
     },
     card: {
       background: '#FFFFFF',
-      border: '3px solid #000000',
-      borderRadius: '10px',
-      boxShadow: '6px 6px 0px #000000',
-      padding: '2rem',
+      border: '3.5px solid #000000',
+      boxShadow: '7px 7px 0px #000000',
+      borderRadius: '12px',
+      padding: '2.5rem 2rem',
+      width: '100%',
     },
     headerTitle: {
       fontFamily: 'Outfit, sans-serif',
       fontWeight: '900',
-      fontSize: '1.6rem',
+      fontSize: '1.65rem',
       color: '#000000',
-      textTransform: 'uppercase',
       letterSpacing: '-0.03em',
+      textAlign: 'center',
     },
     headerSubtitle: {
       color: '#475569',
       fontSize: '0.9rem',
+      textAlign: 'center',
+      marginBottom: '1rem',
     },
     socialButtonsBlockButton: {
       border: '2.5px solid #000000',
@@ -50,10 +39,47 @@ const clerkNeoBrutalistAppearance = {
       fontWeight: '800',
       fontFamily: 'Outfit, sans-serif',
       transition: 'all 0.1s ease',
+      height: '44px',
       '&:hover': {
         background: '#F8FAFC',
-        transform: 'translate(-2px, -2px)',
-        boxShadow: '5px 5px 0px #000000',
+        transform: 'translate(-1px, -1px)',
+        boxShadow: '4px 4px 0px #000000',
+      }
+    },
+    socialButtonsBlockButtonText: {
+      fontWeight: '800',
+      color: '#000000',
+    },
+    dividerLine: {
+      background: '#000000',
+      height: '1.5px',
+    },
+    dividerText: {
+      fontFamily: 'Outfit, sans-serif',
+      fontWeight: '800',
+      fontSize: '0.75rem',
+      color: '#64748B',
+      textTransform: 'uppercase',
+    },
+    formFieldLabel: {
+      fontFamily: 'Outfit, sans-serif',
+      fontWeight: '800',
+      fontSize: '0.8rem',
+      color: '#000000',
+      textTransform: 'uppercase',
+      letterSpacing: '0.03em',
+    },
+    formFieldInput: {
+      border: '2px solid #000000',
+      borderRadius: '6px',
+      boxShadow: '2px 2px 0px #000000',
+      fontWeight: '600',
+      fontSize: '0.95rem',
+      padding: '0.75rem 1rem',
+      '&:focus': {
+        background: '#FFFDF0',
+        borderColor: '#000000',
+        boxShadow: '4px 4px 0px #000000',
       }
     },
     formButtonPrimary: {
@@ -64,8 +90,10 @@ const clerkNeoBrutalistAppearance = {
       boxShadow: '3px 3px 0px #000000',
       fontWeight: '900',
       fontFamily: 'Outfit, sans-serif',
-      fontSize: '0.95rem',
+      fontSize: '1rem',
       textTransform: 'uppercase',
+      letterSpacing: '0.03em',
+      height: '46px',
       transition: 'all 0.1s ease',
       '&:hover': {
         background: '#FFD700',
@@ -73,168 +101,60 @@ const clerkNeoBrutalistAppearance = {
         boxShadow: '5px 5px 0px #000000',
       }
     },
-    formFieldInput: {
+    footerActionLink: {
+      color: '#000000',
+      fontWeight: '900',
+      textDecoration: 'underline',
+      '&:hover': {
+        color: '#000000',
+      }
+    },
+    footerActionText: {
+      fontWeight: '600',
+      color: '#475569',
+    },
+    identityPreview: {
       border: '2px solid #000000',
       borderRadius: '6px',
       boxShadow: '2px 2px 0px #000000',
-      fontWeight: '600',
-      '&:focus': {
-        background: '#FFFDF0',
-        borderColor: '#000000',
-        boxShadow: '4px 4px 0px #000000',
-      }
-    },
-    footerActionLink: {
-      color: '#000000',
-      fontWeight: '800',
-      textDecoration: 'underline',
     }
   }
 };
 
 export default function AuthPage({ 
-  onLoginSuccess, 
   onBack, 
-  initialMode = 'signin',
-  isClerkEnabled = false,
-  clerkUser = null,
-  onClerkSignOut = null
+  initialMode = 'signin'
 }) {
   const [mode, setMode] = useState(initialMode); // 'signin' | 'signup'
 
-  const handleQuickLogin = (member) => {
-    const user = {
-      name: member.name,
-      email: `${member.github}@podlaunch.local`,
-      role: member.role,
-      avatar: member.avatar,
-      token: 'jwt_mock_podlaunch_' + member.github
-    };
-    onLoginSuccess(user);
-  };
-
   return (
-    <div className="auth-page-wrapper">
-      {/* Top Breadcrumb & Return Button */}
-      <div className="auth-page-top max-w-7xl">
+    <div className="minimal-auth-viewport">
+      {/* Top Header Row with Return Button */}
+      <div className="minimal-auth-top">
         <button className="auth-back-btn" onClick={onBack}>
           <ArrowLeft size={16} strokeWidth={2.5} />
-          <span>Back to Console</span>
+          <span>Back to Home</span>
         </button>
-        <div className="auth-status-tags">
-          <span className="neo-tag tag-yellow">CONTROL PLANE ACCESS</span>
-          <span className="neo-tag tag-green">CLERK AUTH: ACTIVE</span>
-        </div>
+        <span className="neo-tag tag-green">CLERK SSO ACTIVE</span>
       </div>
 
-      <div className="auth-page-container max-w-7xl">
-        {/* Left Column: Platform & Capstone Highlights */}
-        <div className="auth-info-column">
-          <div className="auth-info-card neo-card">
-            <div className="auth-badge-header">
-              <span className="neo-tag tag-cyan">GROUP-22 CAPSTONE</span>
-              <span className="neo-tag tag-purple">VIT BHOPAL</span>
-            </div>
-
-            <h1 className="auth-hero-title">
-              Authenticate into <br />
-              <span className="text-highlight">PodLaunch Platform</span>
-            </h1>
-
-            <p className="auth-hero-desc">
-              Deploy standalone functions, trigger synthetic Poisson workloads, inspect sub-millisecond 
-              warm starts, and evaluate four cold-start optimization policies in real-time.
-            </p>
-
-            <div className="auth-features-list">
-              <div className="auth-feat-item">
-                <div className="auth-feat-icon icon-yellow">
-                  <Zap size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h4 className="auth-feat-title">Sub-Millisecond Cold Starts</h4>
-                  <p className="auth-feat-sub">Predictive pre-warming reduces cold start latency by up to 95%.</p>
-                </div>
-              </div>
-
-              <div className="auth-feat-item">
-                <div className="auth-feat-icon icon-mint">
-                  <ShieldCheck size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h4 className="auth-feat-title">Isolated Docker Sandboxes</h4>
-                  <p className="auth-feat-sub">Strict cgroup limits: 128MB RAM, 0.5 CPU, zero network egress.</p>
-                </div>
-              </div>
-
-              <div className="auth-feat-item">
-                <div className="auth-feat-icon icon-cyan">
-                  <Terminal size={18} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <h4 className="auth-feat-title">Zero Hot-Path Telemetry</h4>
-                  <p className="auth-feat-sub">Non-blocking async telemetry logging to PostgreSQL.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick 1-Click Demo Login Preset Buttons */}
-            <div className="auth-quick-section" style={{ marginTop: '1.5rem', paddingTop: '1.25rem' }}>
-              <div className="quick-login-label">
-                <Sparkles size={14} strokeWidth={2.5} />
-                <span>1-Click Team Member Bypass:</span>
-              </div>
-              <div className="quick-profiles-grid">
-                {TEAM_MEMBERS.map((member, idx) => (
-                  <button 
-                    key={idx}
-                    type="button"
-                    className="quick-profile-btn"
-                    onClick={() => handleQuickLogin(member)}
-                  >
-                    <span className="qp-avatar" style={{ backgroundColor: member.color }}>
-                      {member.avatar}
-                    </span>
-                    <div className="qp-info">
-                      <span className="qp-name">{member.name}</span>
-                      <span className="qp-role">{member.role.split(' ')[0]}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Clerk Neo-Brutalist Authentication Component */}
-        <div className="auth-form-column">
-          {isClerkEnabled ? (
-            <div className="clerk-container-wrapper">
-              {mode === 'signin' ? (
-                <SignIn 
-                  routing="hash"
-                  appearance={clerkNeoBrutalistAppearance}
-                  signUpUrl="#signup"
-                  afterSignInUrl="/"
-                />
-              ) : (
-                <SignUp 
-                  routing="hash"
-                  appearance={clerkNeoBrutalistAppearance}
-                  signInUrl="#signin"
-                  afterSignUpUrl="/"
-                />
-              )}
-            </div>
-          ) : (
-            <div className="auth-form-card neo-card">
-              <h2 className="auth-hero-title" style={{ fontSize: '1.6rem' }}>Connect Clerk Auth</h2>
-              <p className="auth-hero-desc">
-                Paste your Clerk Publishable Key in <code>frontend/.env</code> to activate live authentication.
-              </p>
-            </div>
-          )}
-        </div>
+      {/* Centered Single Clerk Auth Container */}
+      <div className="clerk-single-centered-wrap">
+        {mode === 'signin' ? (
+          <SignIn 
+            routing="hash"
+            appearance={clerkNeoBrutalistAppearance}
+            signUpUrl="#signup"
+            afterSignInUrl="/"
+          />
+        ) : (
+          <SignUp 
+            routing="hash"
+            appearance={clerkNeoBrutalistAppearance}
+            signInUrl="#signin"
+            afterSignUpUrl="/"
+          />
+        )}
       </div>
     </div>
   );

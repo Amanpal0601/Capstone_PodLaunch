@@ -1,13 +1,23 @@
+from typing import Optional
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
 from app.core.config import settings
 
-# Async Engine (PostgreSQL)
+# Optional Supabase Client initialization
+supabase_client = None
+if settings.SUPABASE_URL and (settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_ANON_KEY):
+    try:
+        from supabase import create_client, Client
+        supabase_key = settings.SUPABASE_SERVICE_ROLE_KEY or settings.SUPABASE_ANON_KEY
+        supabase_client = create_client(settings.SUPABASE_URL, supabase_key)
+    except Exception as e:
+        print(f"[PodLaunch] Supabase client init warning: {e}")
+
+# Async SQLAlchemy Engine (Supabase / PostgreSQL)
 engine = create_async_engine(
     settings.SQLALCHEMY_DATABASE_URI,
-    echo=settings.DEBUG,
-    future=True
+    echo=False,
+    future=True,
+    pool_pre_ping=True
 )
 
 AsyncSessionLocal = async_sessionmaker(
@@ -24,3 +34,6 @@ async def get_db():
             yield session
         finally:
             await session.close()
+
+def get_supabase():
+    return supabase_client
