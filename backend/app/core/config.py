@@ -24,11 +24,14 @@ class Settings(BaseSettings):
     CLERK_PUBLISHABLE_KEY: Optional[str] = None
     CLERK_SECRET_KEY: Optional[str] = None
 
+    DIRECT_URL: Optional[str] = None
+
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        if self.DATABASE_URL:
-            # Ensure asyncpg dialect is used if standard postgresql:// prefix is given
-            db_uri = self.DATABASE_URL
+        url_to_use = self.DIRECT_URL or self.DATABASE_URL
+        if url_to_use:
+            # Clean off Prisma/pgbouncer flags that asyncpg does not accept as connection args
+            db_uri = url_to_use.split("?pgbouncer")[0].split("?sslmode")[0]
             if db_uri.startswith("postgresql://"):
                 db_uri = db_uri.replace("postgresql://", "postgresql+asyncpg://", 1)
             elif db_uri.startswith("postgres://"):
