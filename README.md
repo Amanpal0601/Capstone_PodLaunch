@@ -95,66 +95,70 @@ flowchart TD
 
 ---
 
-## 6. Monorepo Repository Structure
+## 6. Full-Stack Monorepo Structure
 
 ```text
 PodLaunch/
-├── contracts/               # Shared typed schemas & interfaces (ExecutionRequest, Result, Envelope)
-├── registry/                # Function build pipeline, Dockerfile templates & packaging logic
-├── api/                     # FastAPI invocation router & HTTP entry point
-├── scheduler/               # FIFO queue, concurrency limiter & dispatcher
-├── pool/                    # Pool Manager & 4 pooling strategy implementations
-│   ├── strategies/          # Naive, Keep-Alive, Fixed Pre-Warm, Predictive
-│   └── pool_manager.py      # Core acquire/release lifecycle manager
-├── sandbox/                 # Docker container lifecycle executor, limits & runtime harnesses
-│   ├── runtimes/            # Base images and runner harnesses (Python 3.11, Node 18)
-│   └── docker_sandbox.py    # Sandbox boundary enforcement
-├── metrics/                 # Event-driven metrics logger, schema definitions & emitters
-├── dashboard/               # React real-time telemetry frontend
-├── benchmarks/              # Workload generators (Poisson, steady, periodic) & k6 test suites
-├── docs/                    # Architectural specs, research notes & Capstone deliverables
-├── docker-compose.yml       # Local developer environment setup (PostgreSQL, Grafana/Prometheus)
-├── README.md                # Project overview & documentation entry point
+├── backend/                 # Python 3.11 + FastAPI Control Plane & Execution Engine
+│   ├── app/
+│   │   ├── main.py          # FastAPI application & CORS setup
+│   │   ├── core/config.py   # Settings & PostgreSQL connection parameters
+│   │   ├── contracts/       # Pydantic v2 typed data contracts (Schemas & Errors)
+│   │   ├── db/              # SQLAlchemy async engine & PostgreSQL ORM models
+│   │   ├── services/
+│   │   │   ├── pool/        # Research Core: Strategy Engine & Pool Manager
+│   │   │   │   ├── pool_manager.py
+│   │   │   │   └── strategies/ # Naive, Keep-Alive, Fixed Pre-Warm, Predictive
+│   │   │   ├── sandbox/     # Docker execution engine & cgroups limits
+│   │   │   ├── scheduler/   # Async FIFO request queue & concurrency semaphores
+│   │   │   ├── registry/    # Function packaging & SHA-256 versioning
+│   │   │   └── metrics/     # Async telemetry collector & statistics
+│   │   └── api/v1/          # REST API endpoints (/functions, /invoke, /pool, /telemetry)
+│   ├── Dockerfile           # Backend containerization
+│   ├── requirements.txt     # Python dependencies
+│   └── README.md            # Backend developer guide
+├── frontend/                # React + Vite Real-Time Telemetry & Execution Console
+│   ├── src/
+│   │   ├── App.jsx          # Root view state & navigation
+│   │   ├── components/      # Dashboard, DeployModal, InvokeModal, Navbar, Footer
+│   │   ├── data/            # Seed data & strategy metadata
+│   │   └── index.css        # Neo-brutalist styling system
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── docker-compose.yml       # Full-stack composition (Postgres + Backend + Frontend)
 ├── ARCHITECTURE.md          # Technical specifications, contracts & state machines
-└── CONTEXT.md               # IDE & AI Assistant context guidelines
+├── CONTEXT.md               # IDE & AI Assistant context guidelines
+└── README.md                # Project overview & documentation entry point
 ```
 
 ---
 
-## 7. Prerequisites & Quick-Start (TODO)
+## 7. Quick-Start Guide
 
-### Prerequisites
-- **Operating System:** Linux (recommended for benchmarking precision) or Windows/macOS with Docker Desktop.
-- **Docker Engine:** v24.0+ with Docker Compose v2.0+.
-- **Python:** Version 3.11+.
-- **Node.js:** Version 18+ (for dashboard & Node runtime builds).
-- **k6:** For running benchmark load tests.
-
-### Quick Start (Placeholder / TODO)
-
-> *Note: Code implementation is currently in Phase 1 setup. Commands below represent the planned development workflow.*
-
+### Option A: Complete Full-Stack with Docker Compose (Recommended)
 ```bash
-# 1. Clone repository
-git clone https://github.com/Group22-VITB/PodLaunch.git
-cd PodLaunch
+docker compose up --build
+```
+- **React Frontend Console:** [http://localhost:5173](http://localhost:5173)
+- **FastAPI Backend Docs:** [http://localhost:8000/api/v1/docs](http://localhost:8000/api/v1/docs)
 
-# 2. Start PostgreSQL and dependent local services
-docker compose up -d postgres
+### Option B: Local Development
 
-# 3. Create virtual environment and install dependencies
+#### 1. Backend (Python 3.11 + FastAPI)
+```bash
+cd backend
 python -m venv .venv
-source .venv/bin/activate  # Or `.venv\Scripts\activate` on Windows
-pip install -r requirements-dev.txt
+source .venv/bin/activate    # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
 
-# 4. Run database migrations (TODO)
-alembic upgrade head
-
-# 5. Start PodLaunch API & Scheduler service (TODO)
-uvicorn api.main:app --reload --port 8000
-
-# 6. Run test suite
-pytest
+#### 2. Frontend (React + Vite)
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 ---
